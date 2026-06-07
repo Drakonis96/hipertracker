@@ -14,6 +14,22 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="HiperTracker" />
+    <!-- Manifest con use-credentials para que se solicite con las credenciales
+         del reverse proxy (Basic Auth) y no provoque un 401/diálogo. -->
+    <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
+    <!-- No usamos service worker (incompatible con Basic Auth + CDN). Si quedó
+         alguno registrado de versiones anteriores, lo desregistramos y limpiamos
+         su caché SIN recargar (evita el bucle de recargas). -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations()
+          .then(function (rs) { rs.forEach(function (r) { r.unregister(); }); })
+          .catch(function () {});
+        if (window.caches && caches.keys) {
+          caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); }).catch(function () {});
+        }
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

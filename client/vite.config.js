@@ -1,61 +1,16 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
 
 const API_TARGET = process.env.VITE_API_TARGET || 'http://localhost:5794';
 
+// Nota: NO usamos service worker. Detrás de un reverse proxy con Basic Auth
+// (+ CDN como Cloudflare) un SW provoca diálogos repetidos de credenciales y,
+// con un SW autodestructivo, bucles de recarga. La app sigue siendo instalable
+// gracias al manifest (client/public/manifest.webmanifest, enlazado con
+// crossorigin="use-credentials" en index.html). index.html además incluye un
+// pequeño script que desregistra cualquier SW previo y limpia su caché.
 export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
-      devOptions: { enabled: false },
-      // Un service worker que cachea la navegación rompe el Basic Auth de un
-      // reverse proxy (el navegador no hace el handshake a nivel de documento y
-      // reaparece el diálogo en cada petición). Con selfDestroying el SW se
-      // desregistra y limpia su caché (también en instalaciones previas), y la
-      // app sigue siendo instalable gracias al manifest.
-      selfDestroying: true,
-      // Detrás de Basic Auth, el navegador pide el manifest SIN credenciales y
-      // recibe un 401 (otro diálogo). useCredentials añade crossorigin="use-credentials"
-      // al <link rel="manifest"> para que se solicite con las credenciales del proxy.
-      useCredentials: true,
-      manifest: {
-        name: 'HiperTracker',
-        short_name: 'HiperTracker',
-        description: 'Gestión de listas de la compra',
-        lang: 'es',
-        dir: 'ltr',
-        theme_color: '#10b981',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait',
-        start_url: '/',
-        scope: '/',
-        icons: [
-          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-        ],
-      },
-      workbox: {
-        navigateFallbackDenylist: [/^\/api/, /^\/logos/, /^\/logo/],
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.pathname.startsWith('/logos/') || url.pathname.startsWith('/logo/'),
-            handler: 'CacheFirst',
-            options: { cacheName: 'hipertracker-logos', expiration: { maxEntries: 80 } },
-          },
-          {
-            urlPattern: ({ url }) => url.pathname === '/api/v1/stores',
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'hipertracker-stores' },
-          },
-        ],
-      },
-    }),
-  ],
+  plugins: [react()],
   server: {
     port: 5173,
     proxy: {

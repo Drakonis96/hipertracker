@@ -465,7 +465,7 @@ export default function Settings() {
             <img src="/logo/hipertracker.png" alt="HiperTracker" className="h-10 w-10 rounded-el object-contain" />
             <div className="flex-1">
               <p className="text-sm font-medium">HiperTracker</p>
-              <p className="text-xs text-zinc-400">Versión v0.1.2</p>
+              <p className="text-xs text-zinc-400">Versión v0.1.3</p>
             </div>
           </div>
           <a
