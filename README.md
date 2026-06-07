@@ -145,11 +145,11 @@ La app se distribuye como **IPA sin firmar** vía [AltStore](https://altstore.io
 1. Instala AltStore en tu dispositivo.
 2. En AltStore → *Sources* → **+**, añade la fuente:
    ```
-   https://raw.githubusercontent.com/drakonis96/hipertracker/main/altstore/source.json
+   https://raw.githubusercontent.com/Drakonis96/hipertracker/main/altstore/source.json
    ```
 3. Busca **HiperTracker** e instálala.
 
-En **macOS** descarga el `.dmg` de la [última release](https://github.com/drakonis96/hipertracker/releases). Al no estar notarizada, ábrela con clic derecho → *Abrir* la primera vez.
+En **macOS** descarga el `.dmg` de la [última release](https://github.com/Drakonis96/hipertracker/releases). Al no estar notarizada, ábrela con clic derecho → *Abrir* la primera vez.
 
 ---
 

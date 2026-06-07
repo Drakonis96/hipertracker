@@ -1,0 +1,37 @@
+{
+  "name": "HiperTracker",
+  "identifier": "com.hipertracker.source",
+  "subtitle": "Listas de la compra para tu propio servidor",
+  "description": "Fuente oficial de HiperTracker: la app para gestionar tus listas de la compra conectándose a tu propio servidor HiperTracker.",
+  "iconURL": "https://raw.githubusercontent.com/Drakonis96/hipertracker/main/ios/HiperTracker/Assets.xcassets/AppIcon.appiconset/icon-1024.png",
+  "website": "https://github.com/Drakonis96/hipertracker",
+  "tintColor": "10b981",
+  "apps": [
+    {
+      "name": "HiperTracker",
+      "bundleIdentifier": "com.hipertracker.app",
+      "developerName": "Drakonis96",
+      "subtitle": "Gestiona tus listas de la compra",
+      "localizedDescription": "HiperTracker es una app para gestionar listas de la compra que se conecta a tu propio servidor HiperTracker (autoalojado).\n\n• Perfiles con PIN, listas personales y compartidas.\n• Productos con icono, notas y varias tiendas.\n• Tiendas del sistema (con logo) y tiendas personalizadas.\n• Copia de seguridad completa (exportar/importar).\n• Conexión segura: soporta servidores tras un reverse proxy con Basic Auth; las credenciales y los tokens se guardan en el Keychain y el JWT viaja en X-Auth-Token.\n• Liquid Glass en dispositivos compatibles (iOS 26+).",
+      "iconURL": "https://raw.githubusercontent.com/Drakonis96/hipertracker/main/ios/HiperTracker/Assets.xcassets/AppIcon.appiconset/icon-1024.png",
+      "tintColor": "10b981",
+      "category": "lifestyle",
+      "screenshots": [],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "date": "2026-06-07",
+          "localizedDescription": "Primera versión de HiperTracker para iOS, iPadOS y macOS.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.0/HiperTracker.ipa",
+          "size": 2440623,
+          "minOSVersion": "17.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {}
+      }
+    }
+  ],
+  "news": []
+}
