@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.1",
+          "date": "2026-06-07",
+          "localizedDescription": "Arreglos: 'Cambiar de perfil' abre siempre la selección de perfiles y el service worker deja de provocar peticiones repetidas de Basic Auth tras un reverse proxy.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.1/HiperTracker.ipa",
+          "size": 2440625,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.0",
           "date": "2026-06-07",
           "localizedDescription": "Primera versión de HiperTracker para iOS, iPadOS y macOS.",
