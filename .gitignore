@@ -1,0 +1,28 @@
+# Dependencias / builds
+node_modules/
+dist/
+dev-dist/
+data/
+
+# Logs y sistema
+*.log
+.DS_Store
+**/.DS_Store
+.env
+.env.*
+
+# iOS / Xcode
+ios/build/
+ios/build-ipa/
+ios/build-mac/
+ios/DerivedData/
+ios/HiperTracker.xcodeproj/
+**/xcuserdata/
+**/*.xcuserstate
+.swiftpm/
+*.xcworkspace/xcuserdata/
+
+# Artefactos de release (se publican en GitHub Releases, no en el repo)
+release/
+*.ipa
+*.dmg

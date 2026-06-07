@@ -1,0 +1,17 @@
+services:
+  hipertracker:
+    build: .
+    container_name: hipertracker
+    ports:
+      - "5794:5794"
+    volumes:
+      - ./data:/app/data
+      # Para personalizar los logos de tiendas, descomenta:
+      # - ./logos-personalizados:/app/server/public/logos
+    environment:
+      - NODE_ENV=production
+      - PORT=5794
+      - DB_PATH=/app/data/hipertracker.db
+      - JWT_SECRET=change_me_in_production
+      # - ALLOWED_ORIGINS=https://miapp.example.com
+    restart: unless-stopped

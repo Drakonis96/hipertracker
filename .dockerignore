@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/dev-dist
+data
+*.log
+.git
+.gitignore
+.DS_Store
+**/.DS_Store
+applogo.png
+logos
+README.md
