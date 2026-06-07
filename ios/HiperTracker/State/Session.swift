@@ -78,6 +78,7 @@ final class Session: ObservableObject {
 
         config = cfg
         Keychain.setObject(cfg, for: kConfig)
+        UserDefaults.standard.set(cfg.normalizedBase, forKey: "lastBaseURL")
         try await loadProfiles()
         phase = .needsAuth
     }
@@ -88,6 +89,25 @@ final class Session: ObservableObject {
         Keychain.remove(kGate)
         api.tokens = nil
         api.gateToken = nil
+        profile = nil
+        profiles = []
+        phase = .needsServer
+    }
+
+    /// Cierre de sesión completo: olvida tokens, login de la app, perfil y la
+    /// configuración del servidor (incluidas las credenciales del login de la
+    /// app), de modo que no hay re-login automático. Vuelve a la pantalla de
+    /// conexión. Avisa al servidor para invalidar la cookie (best-effort).
+    func signOut() {
+        Task { try? await api.gateLogout() }
+        Keychain.remove(kTokens)
+        Keychain.remove(kProfile)
+        Keychain.remove(kGate)
+        Keychain.remove(kConfig)
+        api.tokens = nil
+        api.gateToken = nil
+        api.config = nil
+        config = nil
         profile = nil
         profiles = []
         phase = .needsServer

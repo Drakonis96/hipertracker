@@ -238,6 +238,12 @@ final class APIClient {
         guard let user = config?.appUser, let pass = config?.appPassword else { throw APIError.gateRequired }
         try await gateLogin(username: user, password: pass)
     }
+
+    func gateLogout() async throws {
+        gateToken = nil
+        onGateChanged?(nil)
+        _ = try? await perform(path: "/gate/logout", method: "POST", body: nil, authed: false, allowRefresh: false)
+    }
 }
 
 struct EmptyResponse: Decodable {}

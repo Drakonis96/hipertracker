@@ -9,7 +9,7 @@ export const openapiSpec = swaggerJSDoc({
     openapi: '3.0.0',
     info: {
       title: 'HiperTracker API',
-      version: '0.1.5',
+      version: '0.1.6',
       description:
         'API REST de HiperTracker — gestión de listas de la compra multiusuario. ' +
         'Autenticación mediante JWT (Bearer). Obtén el token en POST /auth/login.',

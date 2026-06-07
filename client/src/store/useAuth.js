@@ -77,6 +77,25 @@ export const useAuth = create((set, get) => ({
     await get().init();
   },
 
+  // Cierre de sesión completo: borra la cookie del portero en el servidor, el
+  // token local, la sesión de perfil y recarga. Con replace() la entrada del
+  // historial se sustituye (el botón "atrás" no reentra) y el pageshow de
+  // main.jsx recarga cualquier página restaurada desde la bfcache.
+  signOut: async () => {
+    try {
+      await api('/gate/logout', { method: 'POST', auth: false });
+    } catch {
+      /* ignore */
+    }
+    localStorage.removeItem(GATE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
+    setGateToken(null);
+    setTokens(null);
+    useData.getState().reset();
+    set({ profile: null, tokens: { access: null, refresh: null }, gateAuthed: false, skipAutoLogin: true });
+    window.location.replace('/');
+  },
+
   init: async () => {
     const saved = loadSaved();
     if (saved?.tokens) setTokens(saved.tokens);

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ListChecks, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import { ListChecks, LogOut, Power, Settings as SettingsIcon } from 'lucide-react';
 import Avatar from './Avatar';
 import { useAuth } from '../store/useAuth';
 
 export default function ProfileMenu() {
   const profile = useAuth((s) => s.profile);
   const logout = useAuth((s) => s.logout);
+  const signOut = useAuth((s) => s.signOut);
+  const gateEnabled = useAuth((s) => s.gateEnabled);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -27,7 +29,9 @@ export default function ProfileMenu() {
     { label: 'Gestionar productos', icon: ListChecks, onClick: () => go('/productos') },
     { label: 'Ajustes', icon: SettingsIcon, onClick: () => go('/ajustes') },
     { label: 'Cambiar de perfil', icon: LogOut, onClick: () => { setOpen(false); logout(); navigate('/'); } },
-  ];
+    // Cierre de sesión completo (incluye el login de la app), solo si está activo.
+    gateEnabled && { label: 'Cerrar sesión', icon: Power, danger: true, onClick: () => { setOpen(false); signOut(); } },
+  ].filter(Boolean);
 
   return (
     <div className="relative" ref={ref}>
@@ -59,7 +63,12 @@ export default function ProfileMenu() {
               type="button"
               role="menuitem"
               onClick={it.onClick}
-              className="flex w-full items-center gap-3 px-3.5 py-2.5 text-left text-[15px] text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className={
+                'flex w-full items-center gap-3 px-3.5 py-2.5 text-left text-[15px] transition ' +
+                (it.danger
+                  ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10'
+                  : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800')
+              }
             >
               <it.icon size={17} />
               {it.label}

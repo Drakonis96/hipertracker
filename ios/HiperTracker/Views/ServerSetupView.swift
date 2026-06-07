@@ -3,7 +3,7 @@ import SwiftUI
 struct ServerSetupView: View {
     @EnvironmentObject var session: Session
 
-    @State private var url = "http://localhost:5794"
+    @State private var url = UserDefaults.standard.string(forKey: "lastBaseURL") ?? "http://localhost:5794"
     @State private var useBasic = false
     @State private var user = ""
     @State private var password = ""

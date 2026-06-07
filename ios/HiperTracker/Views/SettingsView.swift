@@ -120,12 +120,16 @@ struct SettingsView: View {
                     if session.config?.usesBasicAuth == true {
                         LabeledContent("Basic Auth", value: session.config?.basicUser ?? "—")
                     }
-                    Button("Cambiar servidor", role: .destructive) { session.changeServer() }
+                    if session.config?.usesAppAuth == true {
+                        LabeledContent("Login de la app", value: session.config?.appUser ?? "—")
+                    }
+                    Button("Cambiar servidor") { session.changeServer() }
+                    Button("Cerrar sesión", role: .destructive) { session.signOut() }
                 }
 
                 // Acerca de
                 Section("Acerca de") {
-                    LabeledContent("Versión", value: "v0.1.5")
+                    LabeledContent("Versión", value: "v0.1.6")
                     if let base = session.config?.normalizedBase, let url = URL(string: base + "/api/docs") {
                         Link("Documentación de la API", destination: url)
                     }
