@@ -9,6 +9,7 @@ import ProfileSelect from './pages/ProfileSelect';
 import MainList from './pages/MainList';
 import ManageProducts from './pages/ManageProducts';
 import Settings from './pages/Settings';
+import RefreshFab from './components/RefreshFab';
 
 function Splash() {
   return (
@@ -33,12 +34,15 @@ function AuthedApp() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<MainList />} />
-      <Route path="/productos" element={<ManageProducts />} />
-      <Route path="/ajustes" element={<Settings />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<MainList />} />
+        <Route path="/productos" element={<ManageProducts />} />
+        <Route path="/ajustes" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <RefreshFab />
+    </>
   );
 }
 

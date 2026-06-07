@@ -131,6 +131,11 @@ struct MainListView: View {
                     }
                 }
                 .listStyle(.plain)
+                .refreshable {
+                    await data.loadStores(force: true)
+                    await data.loadLists()
+                    await data.loadItems()
+                }
             }
         }
     }
@@ -153,7 +158,7 @@ struct MainListView: View {
             Spacer()
             HStack(spacing: 3) {
                 ForEach(item.stores.prefix(3).compactMap { data.storesById[$0] }) { s in
-                    StoreLogoView(store: s, size: 24)
+                    StoreLogoView(store: s, size: 30)
                 }
                 if item.stores.count > 3 {
                     Text("+\(item.stores.count - 3)").font(.caption2).padding(4)

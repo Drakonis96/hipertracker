@@ -75,7 +75,7 @@ export default function FilterBar() {
                   on ? 'border-accent bg-accent/10 text-accent' : 'bg-white dark:bg-zinc-900',
                 )}
               >
-                <StoreLogo store={s} size={18} />
+                <StoreLogo store={s} size={22} />
                 {s.name}
               </button>
             );

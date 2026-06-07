@@ -64,10 +64,10 @@ export default function ProductRow({
       {shown.length > 0 && (
         <div className="flex shrink-0 items-center -space-x-1">
           {shown.map((s) => (
-            <StoreLogo key={s.id} store={s} size={24} className="ring-1 ring-white dark:ring-zinc-900" />
+            <StoreLogo key={s.id} store={s} size={32} className="ring-1 ring-white dark:ring-zinc-900" />
           ))}
           {extra > 0 && (
-            <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-zinc-100 px-1 text-[10px] font-semibold text-zinc-500 ring-1 ring-white dark:bg-zinc-800 dark:ring-zinc-900">
+            <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-zinc-100 px-1 text-[11px] font-semibold text-zinc-500 ring-1 ring-white dark:bg-zinc-800 dark:ring-zinc-900">
               +{extra}
             </span>
           )}

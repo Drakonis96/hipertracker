@@ -48,7 +48,7 @@ dataRouter.get(
 
     const payload = {
       app: 'HiperTracker',
-      version: '0.1.6',
+      version: '0.1.7',
       exportedAt: now(),
       customStores: customs.map((c) => ({ id: c.id, name: c.name, color: c.color })),
       lists: accessibleLists.map((l) => ({
