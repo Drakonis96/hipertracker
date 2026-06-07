@@ -2,24 +2,39 @@ import { config } from '../config.js';
 import { verifyToken } from '../lib/jwt.js';
 import { ApiError } from '../lib/http.js';
 
+export const GATE_COOKIE = 'ht_gate';
+
 export function gateEnabled() {
   return config.appAuth.enabled;
 }
 
-// Si el login de la app está activado, exige un token de acceso válido en la
-// cabecera X-App-Auth. Devuelve el código 'gate_required' para que el cliente
-// muestre la pantalla de login (en vez de cerrar la sesión de perfil).
+// Lee el token del portero de la cookie httpOnly (navegador).
+export function getGateCookie(req) {
+  const raw = req.headers.cookie || '';
+  for (const part of raw.split(';')) {
+    const idx = part.indexOf('=');
+    if (idx === -1) continue;
+    const k = part.slice(0, idx).trim();
+    if (k === GATE_COOKIE) return decodeURIComponent(part.slice(idx + 1).trim());
+  }
+  return null;
+}
+
+// ¿La petición trae un token de acceso válido? La app nativa usa la cabecera
+// X-App-Auth; el navegador usa la cookie httpOnly ht_gate.
+export function hasValidGate(req) {
+  if (!gateEnabled()) return true;
+  const token = req.headers['x-app-auth'] || getGateCookie(req);
+  if (!token) return false;
+  try {
+    return verifyToken(token).type === 'gate';
+  } catch {
+    return false;
+  }
+}
+
 export function requireGate(req, res, next) {
   if (!gateEnabled()) return next();
-  const token = req.headers['x-app-auth'];
-  if (!token) {
-    return next(new ApiError(401, 'Acceso restringido: inicia sesión en la app', 'gate_required'));
-  }
-  try {
-    const payload = verifyToken(token);
-    if (payload.type !== 'gate') throw new Error('tipo incorrecto');
-    return next();
-  } catch {
-    return next(new ApiError(401, 'La sesión de acceso ha caducado', 'gate_required'));
-  }
+  if (hasValidGate(req)) return next();
+  return next(new ApiError(401, 'Acceso restringido: inicia sesión en la app', 'gate_required'));
 }

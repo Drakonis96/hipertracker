@@ -6,6 +6,7 @@ import { profiles } from '../db/schema.js';
 import { signAccessToken, signRefreshToken, verifyToken } from '../lib/jwt.js';
 import { serializeProfile } from '../lib/serializers.js';
 import { asyncHandler, badRequest, unauthorized } from '../lib/http.js';
+import { loginLimiter } from '../middleware/rateLimit.js';
 
 export const authRouter = Router();
 
@@ -31,6 +32,7 @@ export const authRouter = Router();
  */
 authRouter.post(
   '/login',
+  loginLimiter,
   asyncHandler(async (req, res) => {
     const { profileId, pin } = req.body || {};
     if (!profileId) throw badRequest('Falta el identificador de perfil');

@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -21,10 +22,30 @@ const dbPath = process.env.DB_PATH || path.join(repoRoot, 'data', 'hipertracker.
 const dataDir = path.dirname(dbPath);
 fs.mkdirSync(dataDir, { recursive: true });
 
-const jwtSecret = process.env.JWT_SECRET || 'change_me_in_production';
-if (isProd && jwtSecret === 'change_me_in_production') {
-  console.warn('[HiperTracker] AVISO: JWT_SECRET usa el valor por defecto en producción. Cámbialo.');
+// Secreto para firmar tokens. Si no se define (o se deja el valor de ejemplo),
+// se genera uno aleatorio fuerte y se persiste en el volumen de datos, para no
+// usar nunca un secreto adivinable.
+function resolveJwtSecret() {
+  const fromEnv = process.env.JWT_SECRET;
+  if (fromEnv && fromEnv !== 'change_me_in_production') return fromEnv;
+
+  const secretFile = path.join(dataDir, '.jwt-secret');
+  try {
+    const existing = fs.readFileSync(secretFile, 'utf8').trim();
+    if (existing) return existing;
+  } catch {
+    /* no existe todavía */
+  }
+  const generated = crypto.randomBytes(48).toString('hex');
+  try {
+    fs.writeFileSync(secretFile, generated, { mode: 0o600 });
+    console.warn('[HiperTracker] JWT_SECRET no definido: se generó uno aleatorio en data/.jwt-secret');
+  } catch {
+    console.warn('[HiperTracker] AVISO: no se pudo persistir el secreto generado; define JWT_SECRET.');
+  }
+  return generated;
 }
+const jwtSecret = resolveJwtSecret();
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
   .split(',')

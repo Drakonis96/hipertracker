@@ -47,15 +47,19 @@ export const useAuth = create((set, get) => ({
     if (savedGate) setGateToken(savedGate);
 
     let enabled = false;
+    let authed = true;
     try {
+      // El servidor indica si el login está activo y si la sesión actual es
+      // válida (por cookie httpOnly del navegador o por cabecera X-App-Auth).
       const g = await api('/gate', { auth: false });
       enabled = !!g.enabled;
+      authed = !!g.authed;
     } catch {
       /* sin gate / servidor no disponible */
     }
-    set({ gateEnabled: enabled, gateAuthed: !enabled || !!savedGate });
+    set({ gateEnabled: enabled, gateAuthed: !enabled || authed });
 
-    if (enabled && !savedGate) {
+    if (enabled && !authed) {
       useUI.getState().apply(DEFAULTS);
       set({ status: 'ready' });
       return;

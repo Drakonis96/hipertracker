@@ -13,7 +13,9 @@ import { itemsRouter } from './routes/items.js';
 import { storesRouter } from './routes/stores.js';
 import { dataRouter } from './routes/data.js';
 import { gateRouter } from './routes/gate.js';
-import { requireGate } from './middleware/gate.js';
+import { requireGate, gateEnabled, hasValidGate } from './middleware/gate.js';
+import { apiLimiter, loginLimiter } from './middleware/rateLimit.js';
+import { gatePageHtml } from './lib/gatePage.js';
 import { notFoundHandler, errorHandler } from './middleware/errors.js';
 
 export function createApp() {
@@ -26,11 +28,19 @@ export function createApp() {
       ? { origin: true }
       : { origin: config.allowedOrigins };
   app.use(cors(corsOptions));
-  app.use(express.json({ limit: '1mb' }));
+  app.use(express.json({ limit: '2mb' }));
 
-  // Healthcheck
+  // Cabeceras de seguridad básicas (no rompen la app; sin CSP estricto).
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    next();
+  });
+
+  // Healthcheck (público, no limitado: útil para monitores).
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', name: 'HiperTracker', version: '0.1.4' });
+    res.json({ status: 'ok', name: 'HiperTracker', version: '0.1.5' });
   });
 
   // Documentación OpenAPI / Swagger UI
@@ -41,6 +51,8 @@ export function createApp() {
 
   // API v1 — el montaje de items va antes que /lists para que coincida primero.
   const v1 = express.Router();
+  // Tope generoso por IP (defensa frente a abuso); no afecta al uso normal.
+  v1.use(apiLimiter);
   // El "portero" (login de la app) va primero y es público; el resto de la API
   // queda protegido por requireGate cuando está activado.
   v1.use('/gate', gateRouter);
@@ -52,6 +64,21 @@ export function createApp() {
   v1.use('/stores', storesRouter);
   v1.use('/data', dataRouter);
   app.use('/api/v1', v1);
+
+  // Portero del cascarón estático: si el login de la app está activado y el
+  // navegador no tiene sesión, no se sirve NADA del frontend (ni el HTML); en su
+  // lugar se devuelve la página de login. La app nativa (cabecera X-App-Auth) y
+  // el navegador ya autenticado (cookie httpOnly) pasan sin problema.
+  app.use((req, res, next) => {
+    if (!gateEnabled() || req.path.startsWith('/api')) return next();
+    if (hasValidGate(req)) return next();
+    const accept = req.headers.accept || '';
+    if (req.method === 'GET' && accept.includes('text/html')) {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).type('html').send(gatePageHtml);
+    }
+    return res.status(401).type('text/plain').send('Acceso restringido');
+  });
 
   // Assets estáticos: logos de tiendas y logo de la app (/logos/..., /logo/...).
   app.use(express.static(config.paths.publicDir, { index: false }));

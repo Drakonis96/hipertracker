@@ -1,7 +1,7 @@
 <div align="center">
   <img src="server/public/logo/hipertracker.png" width="96" alt="HiperTracker" />
   <h1>HiperTracker</h1>
-  <p><strong>v0.1.4</strong> · Webapp PWA de gestión de listas de la compra multiusuario</p>
+  <p><strong>v0.1.5</strong> · Webapp PWA de gestión de listas de la compra multiusuario</p>
 </div>
 
 ---
