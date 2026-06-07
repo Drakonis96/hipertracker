@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.3",
+          "date": "2026-06-07",
+          "localizedDescription": "Se elimina el service worker (incompatible con Basic Auth + CDN): arregla las peticiones repetidas de credenciales y el bucle de recargas al iniciar sesión.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.3/HiperTracker.ipa",
+          "size": 2440624,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.2",
           "date": "2026-06-07",
           "localizedDescription": "Arreglo de las peticiones repetidas de Basic Auth tras un reverse proxy / CDN: manifest con crossorigin=use-credentials y service worker servido sin caché.",
