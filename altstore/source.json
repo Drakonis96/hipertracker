@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.7",
+          "date": "2026-06-07",
+          "localizedDescription": "Pull-to-refresh para forzar la actualización desde el servidor y logos de tienda más grandes en la lista.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.7/HiperTracker.ipa",
+          "size": 2461422,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.6",
           "date": "2026-06-07",
           "localizedDescription": "Nuevo botón Cerrar sesión del login de la app: cierre completo (olvida tokens, login y configuración) y vuelve a la pantalla de conexión.",
