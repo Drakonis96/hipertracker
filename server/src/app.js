@@ -28,7 +28,7 @@ export function createApp() {
 
   // Healthcheck
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', name: 'HiperTracker', version: '0.1.1' });
+    res.json({ status: 'ok', name: 'HiperTracker', version: '0.1.2' });
   });
 
   // Documentación OpenAPI / Swagger UI
@@ -53,10 +53,32 @@ export function createApp() {
   // Frontend compilado (producción).
   const indexHtml = path.join(config.paths.clientDist, 'index.html');
   if (fs.existsSync(indexHtml)) {
-    app.use(express.static(config.paths.clientDist, { index: false }));
-    // SPA fallback para rutas del cliente (no API).
+    app.use(
+      express.static(config.paths.clientDist, {
+        index: false,
+        setHeaders: (res, filePath) => {
+          const base = path.basename(filePath);
+          // El service worker, su registrador, el HTML y el manifest NUNCA deben
+          // cachearse de forma persistente (ni en el navegador ni en un CDN como
+          // Cloudflare): si no, se sirve un SW obsoleto y reaparece el problema.
+          if (
+            base === 'sw.js' ||
+            base === 'registerSW.js' ||
+            filePath.endsWith('.html') ||
+            filePath.endsWith('.webmanifest')
+          ) {
+            res.setHeader('Cache-Control', 'no-cache');
+          } else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+            // Assets con hash en el nombre: inmutables.
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          }
+        },
+      }),
+    );
+    // SPA fallback para rutas del cliente (no API). El HTML no se cachea.
     app.get(/^\/(?!api\/).*/, (req, res, next) => {
       if (req.method !== 'GET') return next();
+      res.setHeader('Cache-Control', 'no-cache');
       res.sendFile(indexHtml);
     });
   }

@@ -17,6 +17,10 @@ export default defineConfig({
       // desregistra y limpia su caché (también en instalaciones previas), y la
       // app sigue siendo instalable gracias al manifest.
       selfDestroying: true,
+      // Detrás de Basic Auth, el navegador pide el manifest SIN credenciales y
+      // recibe un 401 (otro diálogo). useCredentials añade crossorigin="use-credentials"
+      // al <link rel="manifest"> para que se solicite con las credenciales del proxy.
+      useCredentials: true,
       manifest: {
         name: 'HiperTracker',
         short_name: 'HiperTracker',

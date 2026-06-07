@@ -9,7 +9,7 @@ const storeCount = getStores().length;
 
 app.listen(config.port, () => {
   console.log('');
-  console.log('  🛒  HiperTracker v0.1.1');
+  console.log('  🛒  HiperTracker v0.1.2');
   console.log(`  ▸ Entorno:   ${config.env}`);
   console.log(`  ▸ Servidor:  http://localhost:${config.port}`);
   console.log(`  ▸ API:       http://localhost:${config.port}/api/v1`);
