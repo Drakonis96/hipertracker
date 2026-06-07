@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.6",
+          "date": "2026-06-07",
+          "localizedDescription": "Nuevo botón Cerrar sesión del login de la app: cierre completo (olvida tokens, login y configuración) y vuelve a la pantalla de conexión.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.6/HiperTracker.ipa",
+          "size": 2459362,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.5",
           "date": "2026-06-07",
           "localizedDescription": "Seguridad del login de la app: rate limiting anti fuerza bruta, cabeceras de seguridad y secreto JWT robusto. El cascarón web queda protegido (página de login server-side). La app nativa no cambia su uso.",
