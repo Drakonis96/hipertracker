@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.4",
+          "date": "2026-06-07",
+          "localizedDescription": "Login propio de la app: en Conectar activa 'Login de la app' e introduce usuario y contraseña. Alternativa al Basic Auth del proxy que evita los diálogos repetidos del navegador.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.4/HiperTracker.ipa",
+          "size": 2455935,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.3",
           "date": "2026-06-07",
           "localizedDescription": "Se elimina el service worker (incompatible con Basic Auth + CDN): arregla las peticiones repetidas de credenciales y el bucle de recargas al iniciar sesión.",
