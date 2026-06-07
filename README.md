@@ -78,10 +78,22 @@ npm start              # sirve todo desde http://localhost:5794
 
 ## 🐳 Docker
 
+Compilando localmente:
+
 ```bash
 docker compose up --build
 # App en http://localhost:5794  ·  API docs en http://localhost:5794/api/docs
 ```
+
+### Desde Docker Hub (imagen `linux/amd64`)
+
+Sin compilar, tirando de la imagen publicada [`drakonis96/hipertracker`](https://hub.docker.com/r/drakonis96/hipertracker):
+
+```bash
+docker compose -f docker-compose.hub.yml up -d
+```
+
+La imagen `amd64` se publica automáticamente con el workflow `.github/workflows/docker-publish.yml` al crear un tag `vX.Y.Z` (o ejecutándolo a mano desde *Actions → Run workflow*). Requiere añadir en el repo los secretos `DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN` (Settings → Secrets and variables → Actions).
 
 La base de datos SQLite se guarda en el volumen `./data` para sobrevivir a reinicios.
 
