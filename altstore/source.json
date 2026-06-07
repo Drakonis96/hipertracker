@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.2",
+          "date": "2026-06-07",
+          "localizedDescription": "Arreglo de las peticiones repetidas de Basic Auth tras un reverse proxy / CDN: manifest con crossorigin=use-credentials y service worker servido sin caché.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.2/HiperTracker.ipa",
+          "size": 2440625,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.1",
           "date": "2026-06-07",
           "localizedDescription": "Arreglos: 'Cambiar de perfil' abre siempre la selección de perfiles y el service worker deja de provocar peticiones repetidas de Basic Auth tras un reverse proxy.",
