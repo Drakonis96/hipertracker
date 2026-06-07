@@ -31,6 +31,12 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || '*')
   .map((s) => s.trim())
   .filter(Boolean);
 
+// Login propio de la app (opcional). Se activa cuando hay usuario y contraseña.
+// Protege toda la API con un token (cabecera X-App-Auth), sin depender del
+// Basic Auth de un reverse proxy.
+const appAuthUser = process.env.APP_AUTH_USER || '';
+const appAuthPassword = process.env.APP_AUTH_PASSWORD || '';
+
 export const config = {
   env,
   isProd,
@@ -40,6 +46,12 @@ export const config = {
   jwtSecret,
   accessTokenTtl: process.env.ACCESS_TOKEN_TTL || '12h',
   refreshTokenTtl: process.env.REFRESH_TOKEN_TTL || '30d',
+  gateTokenTtl: process.env.APP_AUTH_TTL || '30d',
+  appAuth: {
+    user: appAuthUser,
+    password: appAuthPassword,
+    enabled: !!(appAuthUser && appAuthPassword),
+  },
   allowedOrigins,
   paths: {
     serverRoot,

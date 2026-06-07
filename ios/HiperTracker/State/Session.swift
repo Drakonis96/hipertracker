@@ -15,10 +15,15 @@ final class Session: ObservableObject {
     private let kConfig = "serverConfig"
     private let kTokens = "tokens"
     private let kProfile = "currentProfile"
+    private let kGate = "gateToken"
 
     init() {
         api.onTokensChanged = { [weak self] tokens in
             Keychain.setObject(tokens, for: self?.kTokens ?? "tokens")
+        }
+        api.onGateChanged = { [weak self] token in
+            if let token { Keychain.set(Data(token.utf8), for: self?.kGate ?? "gateToken") }
+            else { Keychain.remove(self?.kGate ?? "gateToken") }
         }
     }
 
@@ -32,6 +37,7 @@ final class Session: ObservableObject {
         config = cfg
         api.config = cfg
         api.tokens = Keychain.getObject(Tokens.self, for: kTokens)
+        if let gateData = Keychain.get(kGate) { api.gateToken = String(decoding: gateData, as: UTF8.self) }
 
         let savedProfile = Keychain.getObject(Profile.self, for: kProfile)
         do {
@@ -51,14 +57,25 @@ final class Session: ObservableObject {
 
     // MARK: - Servidor
 
-    func connect(baseURL: String, basicUser: String, basicPassword: String) async throws {
+    func connect(baseURL: String, basicUser: String, basicPassword: String,
+                 appUser: String = "", appPassword: String = "") async throws {
         let cfg = ServerConfig(
             baseURL: baseURL,
             basicUser: basicUser.isEmpty ? nil : basicUser,
-            basicPassword: basicPassword.isEmpty ? nil : basicPassword
+            basicPassword: basicPassword.isEmpty ? nil : basicPassword,
+            appUser: appUser.isEmpty ? nil : appUser,
+            appPassword: appPassword.isEmpty ? nil : appPassword
         )
         api.config = cfg
         try await api.checkConnection()
+
+        // Login propio de la app si el servidor lo exige.
+        let gateEnabled = (try? await api.gateStatus()) ?? false
+        if gateEnabled {
+            guard !appUser.isEmpty, !appPassword.isEmpty else { throw APIError.gateRequired }
+            try await api.gateLogin(username: appUser, password: appPassword)
+        }
+
         config = cfg
         Keychain.setObject(cfg, for: kConfig)
         try await loadProfiles()
@@ -68,7 +85,9 @@ final class Session: ObservableObject {
     func changeServer() {
         Keychain.remove(kTokens)
         Keychain.remove(kProfile)
+        Keychain.remove(kGate)
         api.tokens = nil
+        api.gateToken = nil
         profile = nil
         profiles = []
         phase = .needsServer

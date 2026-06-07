@@ -7,6 +7,9 @@ struct ServerSetupView: View {
     @State private var useBasic = false
     @State private var user = ""
     @State private var password = ""
+    @State private var useAppLogin = false
+    @State private var appUser = ""
+    @State private var appPassword = ""
     @State private var loading = false
     @State private var error: String?
 
@@ -51,6 +54,23 @@ struct ServerSetupView: View {
                     }
                 }
 
+                Section {
+                    Toggle("Login de la app", isOn: $useAppLogin.animation())
+                } footer: {
+                    Text("Actívalo si activaste el login propio de HiperTracker en el servidor (APP_AUTH_USER / APP_AUTH_PASSWORD).")
+                }
+
+                if useAppLogin {
+                    Section("Acceso a la app") {
+                        TextField("Usuario", text: $appUser)
+                            .autocorrectionDisabled()
+                            #if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            #endif
+                        SecureField("Contraseña", text: $appPassword)
+                    }
+                }
+
                 if let error {
                     Section { Text(error).foregroundStyle(.red).font(.callout) }
                 }
@@ -76,7 +96,13 @@ struct ServerSetupView: View {
         loading = true
         Task {
             do {
-                try await session.connect(baseURL: url, basicUser: useBasic ? user : "", basicPassword: useBasic ? password : "")
+                try await session.connect(
+                    baseURL: url,
+                    basicUser: useBasic ? user : "",
+                    basicPassword: useBasic ? password : "",
+                    appUser: useAppLogin ? appUser : "",
+                    appPassword: useAppLogin ? appPassword : ""
+                )
             } catch let e as APIError {
                 error = e.errorDescription
             } catch let err {

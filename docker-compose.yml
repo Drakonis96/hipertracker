@@ -14,4 +14,8 @@ services:
       - DB_PATH=/app/data/hipertracker.db
       - JWT_SECRET=change_me_in_production
       # - ALLOWED_ORIGINS=https://miapp.example.com
+      # Login propio de la app (opcional). Si defines ambos, toda la API queda
+      # protegida con una pantalla de login (no necesitas Basic Auth del proxy).
+      # - APP_AUTH_USER=admin
+      # - APP_AUTH_PASSWORD=cambia_esto
     restart: unless-stopped

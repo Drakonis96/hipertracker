@@ -1,9 +1,17 @@
 import { create } from 'zustand';
-import { api, setTokens, setOnAuthChange, setOnUnauthorized } from '../api/client';
+import {
+  api,
+  setTokens,
+  setGateToken,
+  setOnAuthChange,
+  setOnUnauthorized,
+  setOnGateRequired,
+} from '../api/client';
 import { useUI } from './useUI';
 import { useData } from './useData';
 
 const STORAGE_KEY = 'hipertracker.auth';
+const GATE_KEY = 'hipertracker.gate';
 const DEFAULTS = { theme: 'system', accent: '#10b981' };
 
 function loadSaved() {
@@ -24,6 +32,46 @@ export const useAuth = create((set, get) => ({
   profile: null,
   tokens: { access: null, refresh: null },
   skipAutoLogin: false, // tras "Cambiar de perfil" no auto-entrar aunque haya un único perfil sin PIN
+  gateEnabled: false, // el servidor exige login de la app
+  gateAuthed: false, // ya hemos pasado ese login
+
+  // Arranque: primero el "portero" (login de la app si está activado), luego la sesión.
+  bootstrap: async () => {
+    setOnGateRequired(() => {
+      localStorage.removeItem(GATE_KEY);
+      setGateToken(null);
+      set({ gateAuthed: false });
+    });
+
+    const savedGate = localStorage.getItem(GATE_KEY);
+    if (savedGate) setGateToken(savedGate);
+
+    let enabled = false;
+    try {
+      const g = await api('/gate', { auth: false });
+      enabled = !!g.enabled;
+    } catch {
+      /* sin gate / servidor no disponible */
+    }
+    set({ gateEnabled: enabled, gateAuthed: !enabled || !!savedGate });
+
+    if (enabled && !savedGate) {
+      useUI.getState().apply(DEFAULTS);
+      set({ status: 'ready' });
+      return;
+    }
+    await get().init();
+  },
+
+  gateLogin: async (username, password) => {
+    const data = await api('/gate/login', { method: 'POST', auth: false, body: { username, password } });
+    if (data.token) {
+      localStorage.setItem(GATE_KEY, data.token);
+      setGateToken(data.token);
+    }
+    set({ gateAuthed: true });
+    await get().init();
+  },
 
   init: async () => {
     const saved = loadSaved();

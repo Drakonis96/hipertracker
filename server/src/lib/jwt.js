@@ -17,6 +17,11 @@ export function signRefreshToken(profile) {
   );
 }
 
+// Token del "portero" de la app (login propio activable por env).
+export function signGateToken() {
+  return jwt.sign({ type: 'gate' }, config.jwtSecret, { expiresIn: config.gateTokenTtl });
+}
+
 export function verifyToken(token) {
   return jwt.verify(token, config.jwtSecret);
 }

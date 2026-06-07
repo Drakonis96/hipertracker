@@ -12,6 +12,8 @@ import { listsRouter } from './routes/lists.js';
 import { itemsRouter } from './routes/items.js';
 import { storesRouter } from './routes/stores.js';
 import { dataRouter } from './routes/data.js';
+import { gateRouter } from './routes/gate.js';
+import { requireGate } from './middleware/gate.js';
 import { notFoundHandler, errorHandler } from './middleware/errors.js';
 
 export function createApp() {
@@ -28,7 +30,7 @@ export function createApp() {
 
   // Healthcheck
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', name: 'HiperTracker', version: '0.1.3' });
+    res.json({ status: 'ok', name: 'HiperTracker', version: '0.1.4' });
   });
 
   // Documentación OpenAPI / Swagger UI
@@ -39,6 +41,10 @@ export function createApp() {
 
   // API v1 — el montaje de items va antes que /lists para que coincida primero.
   const v1 = express.Router();
+  // El "portero" (login de la app) va primero y es público; el resto de la API
+  // queda protegido por requireGate cuando está activado.
+  v1.use('/gate', gateRouter);
+  v1.use(requireGate);
   v1.use('/auth', authRouter);
   v1.use('/profiles', profilesRouter);
   v1.use('/lists/:listId/items', itemsRouter);

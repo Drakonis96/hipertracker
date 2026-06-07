@@ -4,8 +4,11 @@ struct ServerConfig: Codable, Equatable {
     var baseURL: String              // p. ej. https://midominio.com  o  http://localhost:5794
     var basicUser: String?
     var basicPassword: String?
+    var appUser: String?             // login propio de la app (cabecera X-App-Auth)
+    var appPassword: String?
 
     var usesBasicAuth: Bool { !(basicUser ?? "").isEmpty }
+    var usesAppAuth: Bool { !(appUser ?? "").isEmpty }
     var normalizedBase: String {
         var b = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
         while b.hasSuffix("/") { b.removeLast() }
@@ -23,6 +26,7 @@ enum APIError: LocalizedError {
     case badURL
     case unauthorized
     case basicAuthRequired
+    case gateRequired
     case server(Int, String)
     case transport(String)
     case decoding
@@ -33,6 +37,7 @@ enum APIError: LocalizedError {
         case .badURL: return "La dirección del servidor no es válida"
         case .unauthorized: return "Sesión no válida"
         case .basicAuthRequired: return "El servidor requiere usuario y contraseña (Basic Auth)"
+        case .gateRequired: return "El servidor requiere usuario y contraseña de la app"
         case .server(_, let msg): return msg
         case .transport(let msg): return msg
         case .decoding: return "Respuesta inesperada del servidor"
@@ -47,7 +52,9 @@ enum APIError: LocalizedError {
 final class APIClient {
     var config: ServerConfig?
     var tokens: Tokens?
+    var gateToken: String?
     var onTokensChanged: ((Tokens) -> Void)?
+    var onGateChanged: ((String?) -> Void)?
 
     private let session: URLSession = {
         let cfg = URLSessionConfiguration.default
@@ -74,6 +81,7 @@ final class APIClient {
                 req.setValue("Basic \(data.base64EncodedString())", forHTTPHeaderField: "Authorization")
             }
         }
+        if let gateToken { req.setValue(gateToken, forHTTPHeaderField: "X-App-Auth") }
         let (data, response) = try await session.data(for: req)
         guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
             throw APIError.transport("No se pudo cargar el logo")
@@ -100,6 +108,7 @@ final class APIClient {
         if authed, let token = tokens?.access {
             req.setValue(token, forHTTPHeaderField: "X-Auth-Token")
         }
+        if let gateToken { req.setValue(gateToken, forHTTPHeaderField: "X-App-Auth") }
         if let body {
             req.setValue("application/json", forHTTPHeaderField: "Content-Type")
             req.httpBody = try JSONSerialization.data(withJSONObject: body)
@@ -123,7 +132,15 @@ final class APIClient {
     private func perform(path: String, method: String, body: Any?, authed: Bool, underV1: Bool = true, allowRefresh: Bool = true) async throws -> Data {
         var (data, http) = try await raw(path: path, method: method, body: body, authed: authed, underV1: underV1)
 
-        if http.statusCode == 401 && authed && allowRefresh && tokens?.refresh != nil {
+        // Re-login del portero (login de la app) si su token caducó.
+        if http.statusCode == 401 && allowRefresh && isGateRequired(data) && (config?.usesAppAuth ?? false) {
+            do {
+                try await gateLoginFromConfig()
+                (data, http) = try await raw(path: path, method: method, body: body, authed: authed, underV1: underV1)
+            } catch { /* cae al manejo de error de abajo */ }
+        }
+
+        if http.statusCode == 401 && authed && allowRefresh && tokens?.refresh != nil && !isGateRequired(data) {
             do {
                 try await refreshTokens()
                 (data, http) = try await raw(path: path, method: method, body: body, authed: authed, underV1: underV1)
@@ -132,6 +149,7 @@ final class APIClient {
 
         guard (200...299).contains(http.statusCode) else {
             if http.statusCode == 401 {
+                if isGateRequired(data) { throw APIError.gateRequired }
                 // Distingue Basic Auth del proxy de la sesión de la API.
                 if let header = http.value(forHTTPHeaderField: "WWW-Authenticate"), header.lowercased().contains("basic") {
                     throw APIError.basicAuthRequired
@@ -194,6 +212,31 @@ final class APIClient {
         let resp: LoginResponse = try await post("/auth/refresh", body: ["refreshToken": refresh], authed: false)
         tokens = Tokens(access: resp.token, refresh: resp.refreshToken)
         if let tokens { onTokensChanged?(tokens) }
+    }
+
+    // MARK: - Login de la app (portero)
+
+    private func isGateRequired(_ data: Data) -> Bool {
+        (try? decoder.decode(APIErrorBody.self, from: data))?.error.code == "gate_required"
+    }
+
+    /// ¿El servidor exige login propio de la app?
+    func gateStatus() async throws -> Bool {
+        struct S: Decodable { let enabled: Bool }
+        let s: S = try await get("/gate", authed: false)
+        return s.enabled
+    }
+
+    func gateLogin(username: String, password: String) async throws {
+        struct R: Decodable { let token: String? }
+        let r: R = try await post("/gate/login", body: ["username": username, "password": password], authed: false)
+        gateToken = r.token
+        onGateChanged?(gateToken)
+    }
+
+    private func gateLoginFromConfig() async throws {
+        guard let user = config?.appUser, let pass = config?.appPassword else { throw APIError.gateRequired }
+        try await gateLogin(username: user, password: pass)
     }
 }
 

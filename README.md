@@ -1,7 +1,7 @@
 <div align="center">
   <img src="server/public/logo/hipertracker.png" width="96" alt="HiperTracker" />
   <h1>HiperTracker</h1>
-  <p><strong>v0.1.3</strong> · Webapp PWA de gestión de listas de la compra multiusuario</p>
+  <p><strong>v0.1.4</strong> · Webapp PWA de gestión de listas de la compra multiusuario</p>
 </div>
 
 ---
@@ -107,6 +107,12 @@ La base de datos SQLite se guarda en el volumen `./data` para sobrevivir a reini
 | `ALLOWED_ORIGINS` | `*` | Orígenes CORS permitidos (separados por comas) |
 | `ACCESS_TOKEN_TTL` | `12h` | Caducidad del access token |
 | `REFRESH_TOKEN_TTL` | `30d` | Caducidad del refresh token |
+| `APP_AUTH_USER` | — | Usuario del **login propio de la app** (opcional) |
+| `APP_AUTH_PASSWORD` | — | Contraseña del login propio de la app (opcional) |
+
+### 🔒 Login propio de la app (alternativa al Basic Auth del proxy)
+
+Si defines `APP_AUTH_USER` **y** `APP_AUTH_PASSWORD`, toda la API queda protegida por una **pantalla de login** propia (token firmado en la cabecera `X-App-Auth`, comparación *timing-safe*, nada se almacena en el servidor). Así **no necesitas el Basic Auth del reverse proxy** (que con una PWA causa diálogos repetidos del navegador). Solo el "cascarón" estático (sin datos) es público; todos los datos requieren el login. En la **app nativa**, actívalo en *Conectar → "Login de la app"*.
 
 ## 🔌 API REST
 

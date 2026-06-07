@@ -4,6 +4,7 @@ import { useAuth } from './store/useAuth';
 import { useData } from './store/useData';
 import Toaster from './components/Toaster';
 import Spinner from './components/Spinner';
+import GateLogin from './pages/GateLogin';
 import ProfileSelect from './pages/ProfileSelect';
 import MainList from './pages/MainList';
 import ManageProducts from './pages/ManageProducts';
@@ -22,6 +23,7 @@ function AuthedApp() {
   useEffect(() => {
     (async () => {
       try {
+        await useData.getState().loadStores(true);
         await useData.getState().loadLists();
         await useData.getState().loadItems();
       } catch {
@@ -43,24 +45,28 @@ function AuthedApp() {
 export default function App() {
   const status = useAuth((s) => s.status);
   const profile = useAuth((s) => s.profile);
+  const gateEnabled = useAuth((s) => s.gateEnabled);
+  const gateAuthed = useAuth((s) => s.gateAuthed);
 
   useEffect(() => {
-    useAuth.getState().init();
-    useData.getState().loadStores().catch(() => {});
+    useAuth.getState().bootstrap();
   }, []);
+
+  let view;
+  if (status === 'loading') view = <Splash />;
+  else if (gateEnabled && !gateAuthed) view = <GateLogin />;
+  else if (profile) view = <AuthedApp />;
+  else
+    view = (
+      <Routes>
+        <Route path="*" element={<ProfileSelect />} />
+      </Routes>
+    );
 
   return (
     <>
       <Toaster />
-      {status === 'loading' ? (
-        <Splash />
-      ) : profile ? (
-        <AuthedApp />
-      ) : (
-        <Routes>
-          <Route path="*" element={<ProfileSelect />} />
-        </Routes>
-      )}
+      {view}
     </>
   );
 }
