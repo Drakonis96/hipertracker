@@ -1,6 +1,6 @@
 {
   "name": "hipertracker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "HiperTracker — webapp PWA de gestión de listas de la compra multiusuario",
   "scripts": {

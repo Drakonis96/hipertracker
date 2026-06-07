@@ -1,7 +1,7 @@
 <div align="center">
   <img src="server/public/logo/hipertracker.png" width="96" alt="HiperTracker" />
   <h1>HiperTracker</h1>
-  <p><strong>v0.1.0</strong> · Webapp PWA de gestión de listas de la compra multiusuario</p>
+  <p><strong>v0.1.1</strong> · Webapp PWA de gestión de listas de la compra multiusuario</p>
 </div>
 
 ---
@@ -20,7 +20,7 @@ HiperTracker es una aplicación para gestionar listas de la compra desde el móv
 - **Modo claro/oscuro** + color de acento configurable (guardados por perfil).
 - **Exportar / importar** listas en CSV y JSON.
 - **API REST v1 documentada** con OpenAPI 3.0 (Swagger UI en `/api/docs`) y autenticación JWT.
-- **PWA**: instalable, con manifest, service worker y caché básica offline.
+- **PWA**: instalable (manifest + iconos). El service worker se autodesregistra para no interferir con el Basic Auth de un *reverse proxy*.
 
 ## 🧱 Stack
 

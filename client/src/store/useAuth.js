@@ -23,6 +23,7 @@ export const useAuth = create((set, get) => ({
   profiles: [],
   profile: null,
   tokens: { access: null, refresh: null },
+  skipAutoLogin: false, // tras "Cambiar de perfil" no auto-entrar aunque haya un único perfil sin PIN
 
   init: async () => {
     const saved = loadSaved();
@@ -60,7 +61,7 @@ export const useAuth = create((set, get) => ({
     const data = await api('/auth/login', { method: 'POST', auth: false, body: { profileId, pin } });
     const tokens = { access: data.token, refresh: data.refreshToken };
     setTokens(tokens);
-    set({ profile: data.profile, tokens });
+    set({ profile: data.profile, tokens, skipAutoLogin: false });
     saveSession({ tokens, profile: data.profile });
     useUI.getState().apply({ theme: data.profile.theme, accent: data.profile.accentColor });
     return data.profile;
@@ -69,7 +70,7 @@ export const useAuth = create((set, get) => ({
   logout: () => {
     setTokens(null);
     saveSession(null);
-    set({ profile: null, tokens: { access: null, refresh: null } });
+    set({ profile: null, tokens: { access: null, refresh: null }, skipAutoLogin: true });
     useData.getState().reset();
     useUI.getState().apply(DEFAULTS);
   },

@@ -11,6 +11,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       devOptions: { enabled: false },
+      // Un service worker que cachea la navegación rompe el Basic Auth de un
+      // reverse proxy (el navegador no hace el handshake a nivel de documento y
+      // reaparece el diálogo en cada petición). Con selfDestroying el SW se
+      // desregistra y limpia su caché (también en instalaciones previas), y la
+      // app sigue siendo instalable gracias al manifest.
+      selfDestroying: true,
       manifest: {
         name: 'HiperTracker',
         short_name: 'HiperTracker',

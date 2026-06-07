@@ -11,6 +11,7 @@ export default function ProfileSelect() {
   const profiles = useAuth((s) => s.profiles);
   const profile = useAuth((s) => s.profile);
   const login = useAuth((s) => s.login);
+  const skipAutoLogin = useAuth((s) => s.skipAutoLogin);
   const navigate = useNavigate();
 
   const [pinFor, setPinFor] = useState(null);
@@ -24,16 +25,16 @@ export default function ProfileSelect() {
     if (profile) navigate('/', { replace: true });
   }, [profile, navigate]);
 
-  // Entrada directa si solo hay un perfil sin PIN.
+  // Entrada directa si solo hay un perfil sin PIN (salvo tras "Cambiar de perfil").
   useEffect(() => {
-    if (autoTried.current || profile) return;
+    if (autoTried.current || profile || skipAutoLogin) return;
     if (profiles.length === 1 && !profiles[0].hasPin) {
       autoTried.current = true;
       login(profiles[0].id)
         .then(() => navigate('/', { replace: true }))
         .catch(() => {});
     }
-  }, [profiles, profile, login, navigate]);
+  }, [profiles, profile, login, navigate, skipAutoLogin]);
 
   const select = async (p) => {
     if (p.hasPin) {
