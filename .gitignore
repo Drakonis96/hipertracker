@@ -2,7 +2,9 @@
 node_modules/
 dist/
 dev-dist/
-data/
+# Solo la carpeta de datos SQLite de la raíz (no client/src/data, que es código).
+/data/
+ios/dist/
 
 # Logs y sistema
 *.log

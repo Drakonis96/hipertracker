@@ -156,13 +156,14 @@ struct MainListView: View {
                 }
             }
             Spacer()
-            HStack(spacing: 3) {
+            HStack(spacing: 4) {
                 ForEach(item.stores.prefix(3).compactMap { data.storesById[$0] }) { s in
-                    StoreLogoView(store: s, size: 30)
+                    StoreLogoView(store: s, size: 34)
                 }
                 if item.stores.count > 3 {
-                    Text("+\(item.stores.count - 3)").font(.caption2).padding(4)
-                        .background(Color.secondary.opacity(0.2), in: Circle())
+                    Text("+\(item.stores.count - 3)").font(.caption).fontWeight(.semibold)
+                        .frame(width: 34, height: 34)
+                        .background(Color.secondary.opacity(0.18), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                 }
             }
         }

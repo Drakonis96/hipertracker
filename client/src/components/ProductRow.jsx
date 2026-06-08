@@ -62,12 +62,12 @@ export default function ProductRow({
 
       {/* Logos de tiendas */}
       {shown.length > 0 && (
-        <div className="flex shrink-0 items-center -space-x-1">
+        <div className="flex shrink-0 items-center gap-1">
           {shown.map((s) => (
-            <StoreLogo key={s.id} store={s} size={32} className="ring-1 ring-white dark:ring-zinc-900" />
+            <StoreLogo key={s.id} store={s} size={34} />
           ))}
           {extra > 0 && (
-            <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-zinc-100 px-1 text-[11px] font-semibold text-zinc-500 ring-1 ring-white dark:bg-zinc-800 dark:ring-zinc-900">
+            <span className="flex h-[34px] min-w-[34px] items-center justify-center rounded-md bg-zinc-100 px-1 text-xs font-semibold text-zinc-500 dark:bg-zinc-800">
               +{extra}
             </span>
           )}

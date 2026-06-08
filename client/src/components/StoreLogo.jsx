@@ -25,7 +25,7 @@ export default function StoreLogo({ store, size = 24, className, title }) {
       width={size}
       height={size}
       loading="lazy"
-      className={cn('rounded bg-white object-contain p-0.5 ht-border', className)}
+      className={cn('rounded bg-white object-contain ht-border', className)}
       style={{ width: size, height: size }}
       onError={(e) => {
         e.currentTarget.style.display = 'none';

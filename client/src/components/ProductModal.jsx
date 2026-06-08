@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pencil } from 'lucide-react';
 import Modal from './Modal';
 import Spinner from './Spinner';
 import ProductIcon from './ProductIcon';
 import IconPicker from './IconPicker';
 import StoreSelector from './StoreSelector';
+import { suggestEmojis } from '../data/emojis';
+import { cn } from '../lib/cn';
 import { useData } from '../store/useData';
 import { toast } from '../store/useToast';
 
@@ -40,6 +42,9 @@ export default function ProductModal({ open, onClose, item = null, listId, onSav
   }, [open, item, listId]);
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
+
+  // Sugerencias de emoji según el nombre (en español o inglés).
+  const suggestions = useMemo(() => suggestEmojis(form.name, 8), [form.name]);
 
   const handleSave = async () => {
     if (!form.name.trim()) {
@@ -114,6 +119,30 @@ export default function ProductModal({ open, onClose, item = null, listId, onSav
               />
             </div>
           </div>
+
+          {/* Sugerencias de emoji según el nombre */}
+          {suggestions.length > 0 && (
+            <div className="-mt-1 flex flex-wrap items-center gap-1.5">
+              <span className="mr-0.5 text-xs text-zinc-400">Sugerencias:</span>
+              {suggestions.map((s) => {
+                const active = form.iconType === 'emoji' && form.icon === s.emoji;
+                return (
+                  <button
+                    key={s.emoji}
+                    type="button"
+                    onClick={() => set({ iconType: 'emoji', icon: s.emoji })}
+                    title={s.keywords}
+                    className={cn(
+                      'flex h-9 w-9 items-center justify-center rounded-lg text-xl transition ht-border',
+                      active ? 'bg-accent/15 ring-2 ring-accent' : 'bg-zinc-50 hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-700',
+                    )}
+                  >
+                    {s.emoji}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           {/* Tiendas */}
           <div>

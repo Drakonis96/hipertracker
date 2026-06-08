@@ -14,11 +14,14 @@ export default function StoreSelector({ stores, value = [], onChange }) {
   const groups = useMemo(() => {
     const needle = q.trim().toLowerCase();
     const filtered = stores.filter((s) => !needle || s.name.toLowerCase().includes(needle));
+    const order = { supermercados: 0, otras: 1, personalizada: 2 };
     const byCat = {};
     for (const s of filtered) {
-      (byCat[s.categoryLabel] ||= []).push(s);
+      (byCat[s.categoryLabel] ||= { cat: s.category, items: [] }).items.push(s);
     }
-    return Object.entries(byCat);
+    return Object.entries(byCat)
+      .sort((a, b) => (order[a[1].cat] ?? 9) - (order[b[1].cat] ?? 9))
+      .map(([label, g]) => [label, g.items]);
   }, [stores, q]);
 
   const toggle = (id) => {
@@ -34,7 +37,7 @@ export default function StoreSelector({ stores, value = [], onChange }) {
               key={s.id}
               className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 py-1 pl-1 pr-2 text-xs font-medium dark:bg-zinc-800"
             >
-              <StoreLogo store={s} size={18} />
+              <StoreLogo store={s} size={22} />
               {s.name}
               <button type="button" onClick={() => toggle(s.id)} aria-label={`Quitar ${s.name}`}>
                 <X size={13} className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200" />
@@ -69,7 +72,7 @@ export default function StoreSelector({ stores, value = [], onChange }) {
                   onClick={() => toggle(s.id)}
                   className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
                 >
-                  <StoreLogo store={s} size={26} />
+                  <StoreLogo store={s} size={34} />
                   <span className="flex-1 truncate">{s.name}</span>
                   <span
                     className={cn(

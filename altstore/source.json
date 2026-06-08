@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.8",
+          "date": "2026-06-08",
+          "localizedDescription": "Sugerencias de emoji al escribir el nombre del producto (en español o inglés), selector de tiendas con los supermercados primero y logos de tienda más grandes.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.8/HiperTracker.ipa",
+          "size": 2470520,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.7",
           "date": "2026-06-07",
           "localizedDescription": "Pull-to-refresh para forzar la actualización desde el servidor y logos de tienda más grandes en la lista.",

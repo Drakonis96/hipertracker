@@ -16,6 +16,7 @@ struct ProductEditView: View {
     @State private var error: String?
 
     private var editing: Bool { item != nil }
+    private var suggestions: [String] { suggestEmojis(name) }
     private var previewItem: Item {
         Item(id: "_", name: name.isEmpty ? "?" : name, icon: icon, iconType: iconType,
              stores: [], listId: "", checked: false, order: 0, notes: nil)
@@ -28,6 +29,21 @@ struct ProductEditView: View {
                     HStack(spacing: 14) {
                         ItemIcon(item: previewItem, size: 52)
                         TextField("Nombre del producto", text: $name)
+                    }
+                }
+
+                if !suggestions.isEmpty {
+                    Section("Sugerencias") {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(suggestions, id: \.self) { e in
+                                    Button { iconType = "emoji"; icon = e } label: {
+                                        Text(e).font(.title2).frame(width: 40, height: 40)
+                                            .background(icon == e && iconType == "emoji" ? Color.accentColor.opacity(0.25) : Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                                    }.buttonStyle(.plain)
+                                }
+                            }.padding(.vertical, 2)
+                        }
                     }
                 }
 
@@ -132,10 +148,22 @@ struct StorePickerView: View {
     @State private var search = ""
     @State private var showNew = false
 
+    private func categoryRank(_ category: String) -> Int {
+        switch category {
+        case "supermercados": return 0
+        case "otras": return 1
+        default: return 2 // personalizada y demás
+        }
+    }
+
     private var grouped: [(String, [Store])] {
         let filtered = data.stores.filter { search.isEmpty || $0.name.localizedCaseInsensitiveContains(search) }
         let dict = Dictionary(grouping: filtered, by: { $0.categoryLabel })
-        return dict.sorted { $0.key < $1.key }
+        // Primero Supermercados, luego Otras, luego Personalizadas.
+        return dict.sorted {
+            let r0 = categoryRank($0.value.first?.category ?? ""), r1 = categoryRank($1.value.first?.category ?? "")
+            return r0 != r1 ? r0 < r1 : $0.key < $1.key
+        }
     }
 
     var body: some View {
@@ -147,7 +175,7 @@ struct StorePickerView: View {
                             if selected.contains(s.id) { selected.remove(s.id) } else { selected.insert(s.id) }
                         } label: {
                             HStack {
-                                StoreLogoView(store: s, size: 28)
+                                StoreLogoView(store: s, size: 34)
                                 Text(s.name).foregroundStyle(.primary)
                                 Spacer()
                                 if selected.contains(s.id) {
