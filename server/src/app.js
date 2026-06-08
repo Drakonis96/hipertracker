@@ -40,7 +40,7 @@ export function createApp() {
 
   // Healthcheck (público, no limitado: útil para monitores).
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', name: 'HiperTracker', version: '0.1.10' });
+    res.json({ status: 'ok', name: 'HiperTracker', version: '0.1.11' });
   });
 
   // Documentación OpenAPI / Swagger UI

@@ -9,8 +9,6 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Lock,
-  Users,
   ShieldCheck,
   Download,
   Upload,
@@ -31,6 +29,7 @@ import CustomStoreModal from '../components/CustomStoreModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { cn } from '../lib/cn';
 import { ACCENT_PALETTE } from '../lib/colors';
+import { listTypeIcon, listTypeLabel } from '../lib/listMeta';
 import { useAuth } from '../store/useAuth';
 import { useData } from '../store/useData';
 import { useUI } from '../store/useUI';
@@ -306,15 +305,17 @@ export default function Settings() {
           }
         >
           {lists.length === 0 && <p className="p-3 text-sm text-zinc-400">No hay listas todavía.</p>}
-          {lists.map((l) => (
+          {lists.map((l) => {
+            const ListIcon = listTypeIcon(l.type);
+            return (
             <div key={l.id} className="flex items-center gap-3 p-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-el bg-zinc-100 text-zinc-500 dark:bg-zinc-800">
-                {l.type === 'shared' ? <Users size={18} /> : <Lock size={18} />}
+                <ListIcon size={18} />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{l.name}</p>
                 <p className="text-xs text-zinc-400">
-                  {l.type === 'shared' ? 'Compartida' : 'Personal'} · {l.checkedCount}/{l.itemCount} productos
+                  {listTypeLabel(l.type)} · {l.checkedCount}/{l.itemCount} productos
                 </p>
               </div>
               <button type="button" className="ht-icon-btn" aria-label="Editar lista" onClick={() => setListModal({ open: true, list: l })}>
@@ -344,7 +345,8 @@ export default function Settings() {
                 <Trash2 size={17} />
               </button>
             </div>
-          ))}
+            );
+          })}
         </Section>
 
         {/* Tiendas */}

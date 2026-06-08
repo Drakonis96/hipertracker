@@ -184,8 +184,8 @@ struct MainListView: View {
         let pct = total == 0 ? 0.0 : Double(checked) / Double(total)
         return VStack(spacing: 4) {
             HStack {
-                Label(data.activeList?.isShared == true ? "Compartida" : "Personal",
-                      systemImage: data.activeList?.isShared == true ? "person.2.fill" : "lock.fill")
+                Label(data.activeList?.shareLabel ?? "Personal",
+                      systemImage: data.activeList?.shareIconFill ?? "lock.fill")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Text("\(checked)/\(total) · \(Int(pct * 100))%").font(.caption).monospacedDigit().foregroundStyle(.secondary)
@@ -233,7 +233,7 @@ struct MainListView: View {
                     Button {
                         Task { await data.setActiveList(l.id) }
                     } label: {
-                        Label(l.name, systemImage: l.id == data.activeListId ? "checkmark" : (l.isShared ? "person.2" : "lock"))
+                        Label(l.name, systemImage: l.id == data.activeListId ? "checkmark" : l.shareIcon)
                     }
                 }
                 Divider()
@@ -269,23 +269,54 @@ struct MainListView: View {
 
 struct ListEditView: View {
     @EnvironmentObject var data: DataStore
+    @EnvironmentObject var session: Session
     @Environment(\.dismiss) private var dismiss
     let list: ShoppingList?
 
     @State private var name = ""
     @State private var type = "personal"
+    @State private var selectedMembers: Set<String> = []
     @State private var saving = false
     @State private var error: String?
+    @State private var loaded = false
+
+    // El propietario siempre tiene acceso: no se ofrece como seleccionable.
+    private var ownerId: String { list?.ownerId ?? session.profile?.id ?? "" }
+    private var selectableProfiles: [Profile] { session.profiles.filter { $0.id != ownerId } }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Nombre") { TextField("Ej. Compra semanal", text: $name) }
-                Section("Tipo") {
-                    Picker("Tipo", selection: $type) {
+                Section("Compartir") {
+                    Picker("Compartir", selection: $type) {
                         Label("Personal", systemImage: "lock").tag("personal")
-                        Label("Compartida", systemImage: "person.2").tag("shared")
+                        Label("Con todos", systemImage: "person.2").tag("shared")
+                        Label("Usuarios concretos", systemImage: "person.crop.circle.badge.plus").tag("custom")
                     }.pickerStyle(.inline).labelsHidden()
+                }
+                if type == "custom" {
+                    Section("¿Con qué perfiles la compartes?") {
+                        if selectableProfiles.isEmpty {
+                            Text("No hay otros perfiles con los que compartir.").foregroundStyle(.secondary)
+                        } else {
+                            ForEach(selectableProfiles) { p in
+                                Button {
+                                    if selectedMembers.contains(p.id) { selectedMembers.remove(p.id) }
+                                    else { selectedMembers.insert(p.id) }
+                                } label: {
+                                    HStack {
+                                        AvatarView(profile: p, size: 30)
+                                        Text(p.name).foregroundStyle(.primary)
+                                        Spacer()
+                                        if selectedMembers.contains(p.id) {
+                                            Image(systemName: "checkmark").foregroundStyle(Color.accentColor)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 if let error { Text(error).foregroundStyle(.red) }
             }
@@ -297,7 +328,18 @@ struct ListEditView: View {
                         .disabled(saving || name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
-            .onAppear { if let l = list { name = l.name; type = l.type } }
+            .onAppear(perform: load)
+            .task { if session.profiles.isEmpty { try? await session.loadProfiles() } }
+        }
+    }
+
+    private func load() {
+        guard !loaded else { return }
+        loaded = true
+        if let l = list {
+            name = l.name
+            type = l.type
+            selectedMembers = Set(l.memberIds ?? [])
         }
     }
 
@@ -305,8 +347,9 @@ struct ListEditView: View {
         saving = true; error = nil
         Task {
             do {
-                if let l = list { try await data.updateList(id: l.id, name: name, type: type) }
-                else { try await data.createList(name: name, type: type) }
+                let members = Array(selectedMembers)
+                if let l = list { try await data.updateList(id: l.id, name: name, type: type, memberIds: members) }
+                else { try await data.createList(name: name, type: type, memberIds: members) }
                 dismiss()
             } catch let e as APIError { error = e.errorDescription }
             catch let err { error = err.localizedDescription }

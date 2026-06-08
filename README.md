@@ -1,7 +1,7 @@
 <div align="center">
   <img src="server/public/logo/hipertracker.png" width="96" alt="HiperTracker" />
   <h1>HiperTracker</h1>
-  <p><strong>v0.1.10</strong> · Webapp PWA de gestión de listas de la compra multiusuario</p>
+  <p><strong>v0.1.11</strong> · Webapp PWA de gestión de listas de la compra multiusuario</p>
 </div>
 
 ---
@@ -11,7 +11,7 @@ HiperTracker es una aplicación para gestionar listas de la compra desde el móv
 ## ✨ Características
 
 - **Perfiles tipo Netflix** con avatar, color y PIN opcional (4–6 dígitos, hasheado con bcrypt).
-- **Listas personales y compartidas** entre los perfiles del dispositivo.
+- **Listas personales, compartidas con todos o con perfiles concretos** (el admin puede editar la compartición de cualquier lista).
 - **Productos** con icono (emoji, librería de iconos vectoriales o inicial), tiendas asociadas, notas y estado de comprado.
 - **Selector de iconos** con tres pestañas (emojis con buscador, iconos temáticos y “sin icono”) y **sugerencias automáticas de emoji** al escribir el nombre (en español o inglés).
 - **37 tiendas** cargadas automáticamente desde los logos del sistema.

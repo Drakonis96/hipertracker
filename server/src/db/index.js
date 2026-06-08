@@ -59,9 +59,17 @@ function initSchema() {
       PRIMARY KEY (item_id, store_id)
     );
 
+    CREATE TABLE IF NOT EXISTS list_members (
+      list_id    TEXT NOT NULL REFERENCES lists(id) ON DELETE CASCADE,
+      profile_id TEXT NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+      PRIMARY KEY (list_id, profile_id)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_lists_owner ON lists(owner_id);
     CREATE INDEX IF NOT EXISTS idx_items_list ON items(list_id);
     CREATE INDEX IF NOT EXISTS idx_item_stores_item ON item_stores(item_id);
+    CREATE INDEX IF NOT EXISTS idx_list_members_list ON list_members(list_id);
+    CREATE INDEX IF NOT EXISTS idx_list_members_profile ON list_members(profile_id);
   `);
 }
 

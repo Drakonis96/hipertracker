@@ -56,13 +56,16 @@ final class DataStore: ObservableObject {
         setActiveLocal(id)
         await loadItems()
     }
-    func createList(name: String, type: String) async throws {
-        let created: ShoppingList = try await api.post("/lists", body: ["name": name, "type": type])
+    func createList(name: String, type: String, memberIds: [String] = []) async throws {
+        var body: [String: Any] = ["name": name, "type": type]
+        if type == "custom" { body["memberIds"] = memberIds }
+        let created: ShoppingList = try await api.post("/lists", body: body)
         await loadLists()
         await setActiveList(created.id)
     }
-    func updateList(id: String, name: String, type: String) async throws {
-        let _: ShoppingList = try await api.patch("/lists/\(id)", body: ["name": name, "type": type])
+    func updateList(id: String, name: String, type: String, memberIds: [String] = []) async throws {
+        let body: [String: Any] = ["name": name, "type": type, "memberIds": type == "custom" ? memberIds : []]
+        let _: ShoppingList = try await api.patch("/lists/\(id)", body: body)
         await loadLists()
     }
     func deleteList(id: String) async throws {

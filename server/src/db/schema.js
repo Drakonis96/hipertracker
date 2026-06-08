@@ -16,11 +16,24 @@ export const profiles = sqliteTable('profiles', {
 export const lists = sqliteTable('lists', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
-  type: text('type').notNull().default('personal'), // personal | shared
+  type: text('type').notNull().default('personal'), // personal | shared | custom
   ownerId: text('owner_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
   createdAt: integer('created_at').notNull(),
   updatedAt: integer('updated_at').notNull(),
 });
+
+// Miembros de una lista "custom" (compartida con perfiles concretos).
+// El propietario siempre tiene acceso y no se guarda aquí.
+export const listMembers = sqliteTable(
+  'list_members',
+  {
+    listId: text('list_id').notNull().references(() => lists.id, { onDelete: 'cascade' }),
+    profileId: text('profile_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.listId, t.profileId] }),
+  }),
+);
 
 export const items = sqliteTable('items', {
   id: text('id').primaryKey(),

@@ -31,14 +31,16 @@ export function publicProfile(p) {
 }
 
 export function serializeList(l, extra = {}) {
+  const { memberIds = [], ...rest } = extra;
   return {
     id: l.id,
     name: l.name,
     type: l.type,
     ownerId: l.ownerId,
+    memberIds, // perfiles concretos con acceso (solo listas "custom")
     createdAt: l.createdAt,
     updatedAt: l.updatedAt,
-    ...extra,
+    ...rest,
   };
 }
 

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, Lock, Plus, Users } from 'lucide-react';
+import { Check, ChevronDown, Plus } from 'lucide-react';
 import { useData } from '../store/useData';
 import { cn } from '../lib/cn';
+import { listTypeIcon } from '../lib/listMeta';
 
 export default function ListSwitcher({ onNewList }) {
   const lists = useData((s) => s.lists);
@@ -11,6 +12,7 @@ export default function ListSwitcher({ onNewList }) {
   const ref = useRef(null);
 
   const active = lists.find((l) => l.id === activeListId);
+  const ActiveIcon = listTypeIcon(active?.type);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -28,7 +30,7 @@ export default function ListSwitcher({ onNewList }) {
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        {active?.type === 'shared' ? <Users size={15} className="shrink-0 text-zinc-400" /> : <Lock size={15} className="shrink-0 text-zinc-400" />}
+        <ActiveIcon size={15} className="shrink-0 text-zinc-400" />
         <span className="truncate">{active ? active.name : 'Sin listas'}</span>
         <ChevronDown size={16} className={cn('shrink-0 text-zinc-400 transition', open && 'rotate-180')} />
       </button>
@@ -40,7 +42,7 @@ export default function ListSwitcher({ onNewList }) {
         >
           {lists.map((l) => {
             const isActive = l.id === activeListId;
-            const Icon = l.type === 'shared' ? Users : Lock;
+            const Icon = listTypeIcon(l.type);
             return (
               <button
                 key={l.id}

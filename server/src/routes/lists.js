@@ -1,15 +1,17 @@
 import { Router } from 'express';
-import { eq, or, inArray } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/index.js';
-import { lists, items } from '../db/schema.js';
+import { lists, items, listMembers, profiles } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
 import { serializeList, serializeItems } from '../lib/serializers.js';
-import { canManageList, loadAccessibleList } from '../lib/access.js';
+import { canManageList, canAccessList, loadAccessibleList, listMemberIds } from '../lib/access.js';
 import { asyncHandler, badRequest, notFound, forbidden } from '../lib/http.js';
 import { newId, now } from '../lib/ids.js';
 
 export const listsRouter = Router();
 listsRouter.use(requireAuth);
+
+const LIST_TYPES = ['personal', 'shared', 'custom'];
 
 function countsFor(listIds) {
   const counts = new Map();
@@ -22,6 +24,30 @@ function countsFor(listIds) {
     counts.set(r.listId, c);
   }
   return counts;
+}
+
+function membersFor(listIds) {
+  const byList = new Map();
+  if (listIds.length === 0) return byList;
+  const rows = db.select().from(listMembers).where(inArray(listMembers.listId, listIds)).all();
+  for (const r of rows) {
+    if (!byList.has(r.listId)) byList.set(r.listId, []);
+    byList.get(r.listId).push(r.profileId);
+  }
+  return byList;
+}
+
+// Reemplaza los miembros de una lista "custom" por la selección dada,
+// descartando ids inexistentes y al propietario (siempre tiene acceso).
+function setListMembers(listId, memberIds, ownerId) {
+  db.delete(listMembers).where(eq(listMembers.listId, listId)).run();
+  const valid = new Set(db.select().from(profiles).all().map((p) => p.id));
+  const ids = [...new Set((Array.isArray(memberIds) ? memberIds : []).map(String))].filter(
+    (id) => valid.has(id) && id !== ownerId,
+  );
+  if (ids.length) {
+    db.insert(listMembers).values(ids.map((profileId) => ({ listId, profileId }))).run();
+  }
 }
 
 /**
@@ -37,16 +63,23 @@ function countsFor(listIds) {
 listsRouter.get(
   '/',
   asyncHandler(async (req, res) => {
+    // Accesibles: compartidas con todos, propias, custom donde es miembro y
+    // (si es admin) todas. canAccessList resuelve la pertenencia a custom.
     const rows = db
       .select()
       .from(lists)
-      .where(or(eq(lists.type, 'shared'), eq(lists.ownerId, req.profile.id)))
       .orderBy(lists.createdAt)
-      .all();
-    const counts = countsFor(rows.map((r) => r.id));
+      .all()
+      .filter((l) => canAccessList(l, req.profile));
+    const ids = rows.map((r) => r.id);
+    const counts = countsFor(ids);
+    const members = membersFor(ids);
     res.json(
       rows.map((l) =>
-        serializeList(l, counts.get(l.id) || { itemCount: 0, checkedCount: 0 }),
+        serializeList(l, {
+          ...(counts.get(l.id) || { itemCount: 0, checkedCount: 0 }),
+          memberIds: members.get(l.id) || [],
+        }),
       ),
     );
   }),
@@ -65,9 +98,9 @@ listsRouter.get(
 listsRouter.post(
   '/',
   asyncHandler(async (req, res) => {
-    const { name, type } = req.body || {};
+    const { name, type, memberIds } = req.body || {};
     if (!name || !String(name).trim()) throw badRequest('El nombre de la lista es obligatorio');
-    const listType = type === 'shared' ? 'shared' : 'personal';
+    const listType = LIST_TYPES.includes(type) ? type : 'personal';
     const ts = now();
     const row = {
       id: newId(),
@@ -78,7 +111,10 @@ listsRouter.post(
       updatedAt: ts,
     };
     db.insert(lists).values(row).run();
-    res.status(201).json(serializeList(row, { itemCount: 0, checkedCount: 0 }));
+    if (listType === 'custom') setListMembers(row.id, memberIds, row.ownerId);
+    res.status(201).json(
+      serializeList(row, { itemCount: 0, checkedCount: 0, memberIds: listMemberIds(row.id) }),
+    );
   }),
 );
 
@@ -104,19 +140,28 @@ listsRouter.patch(
     if (!list) throw notFound('Lista no encontrada');
     if (!canManageList(list, req.profile)) throw forbidden('Solo el propietario puede modificar esta lista');
 
-    const { name, type } = req.body || {};
+    const { name, type, memberIds } = req.body || {};
     const updates = { updatedAt: now() };
     if (name !== undefined) {
       if (!String(name).trim()) throw badRequest('El nombre no puede estar vacío');
       updates.name = String(name).trim();
     }
     if (type !== undefined) {
-      if (!['personal', 'shared'].includes(type)) throw badRequest('Tipo de lista no válido');
+      if (!LIST_TYPES.includes(type)) throw badRequest('Tipo de lista no válido');
       updates.type = type;
     }
     db.update(lists).set(updates).where(eq(lists.id, list.id)).run();
+
+    const finalType = updates.type ?? list.type;
+    if (finalType !== 'custom') {
+      // Al dejar de ser "custom" se limpian los miembros.
+      db.delete(listMembers).where(eq(listMembers.listId, list.id)).run();
+    } else if (memberIds !== undefined) {
+      setListMembers(list.id, memberIds, list.ownerId);
+    }
+
     const fresh = db.select().from(lists).where(eq(lists.id, list.id)).get();
-    res.json(serializeList(fresh));
+    res.json(serializeList(fresh, { memberIds: listMemberIds(list.id) }));
   }),
 );
 

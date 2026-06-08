@@ -14,12 +14,36 @@ struct Profile: Codable, Identifiable, Hashable {
 struct ShoppingList: Codable, Identifiable, Hashable {
     let id: String
     var name: String
-    var type: String          // "personal" | "shared"
+    var type: String          // "personal" | "shared" | "custom"
     var ownerId: String
+    var memberIds: [String]?  // perfiles concretos con acceso (solo "custom")
     var itemCount: Int?
     var checkedCount: Int?
 
     var isShared: Bool { type == "shared" }
+
+    // Icono/etiqueta según el modo de compartir (personal | shared | custom).
+    var shareIcon: String {
+        switch type {
+        case "shared": return "person.2"
+        case "custom": return "person.crop.circle.badge.plus"
+        default: return "lock"
+        }
+    }
+    var shareIconFill: String {
+        switch type {
+        case "shared": return "person.2.fill"
+        case "custom": return "person.crop.circle.badge.plus"
+        default: return "lock.fill"
+        }
+    }
+    var shareLabel: String {
+        switch type {
+        case "shared": return "Con todos"
+        case "custom": return "Con algunos"
+        default: return "Personal"
+        }
+    }
 }
 
 struct Item: Codable, Identifiable, Hashable {

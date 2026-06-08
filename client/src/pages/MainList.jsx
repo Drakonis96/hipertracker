@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ClipboardList, PackageOpen, SearchX, Lock, Users } from 'lucide-react';
+import { ClipboardList, PackageOpen, SearchX } from 'lucide-react';
 import Header from '../components/Header';
 import FilterBar from '../components/FilterBar';
 import ProductList from '../components/ProductList';
@@ -9,6 +9,7 @@ import ListFormModal from '../components/ListFormModal';
 import Fab from '../components/Fab';
 import EmptyState from '../components/EmptyState';
 import Spinner from '../components/Spinner';
+import { listTypeIcon } from '../lib/listMeta';
 import { useData } from '../store/useData';
 import { filterItems, hasActiveFilters } from '../lib/filter';
 
@@ -26,6 +27,7 @@ export default function MainList() {
   const [newListOpen, setNewListOpen] = useState(false);
 
   const activeList = lists.find((l) => l.id === activeListId);
+  const ActiveListIcon = listTypeIcon(activeList?.type);
   const filtered = useMemo(() => filterItems(items, filters), [items, filters]);
   const done = items.filter((i) => i.checked).length;
   const pct = items.length ? Math.round((done / items.length) * 100) : 0;
@@ -39,7 +41,7 @@ export default function MainList() {
         <div className="mx-auto max-w-3xl px-3 pt-3">
           <div className="flex items-center justify-between text-xs text-zinc-500">
             <span className="flex items-center gap-1.5 font-medium text-zinc-700 dark:text-zinc-200">
-              {activeList.type === 'shared' ? <Users size={13} /> : <Lock size={13} />}
+              <ActiveListIcon size={13} />
               {activeList.name}
             </span>
             <span className="tabular-nums">

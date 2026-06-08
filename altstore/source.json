@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.11",
+          "date": "2026-06-08",
+          "localizedDescription": "Compartir listas con perfiles concretos: además de 'personal' y 'con todos', ahora puedes elegir qué perfiles ven cada lista. El administrador puede editar la compartición de cualquier lista.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.11/HiperTracker.ipa",
+          "size": 2484465,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.10",
           "date": "2026-06-08",
           "localizedDescription": "Sección Tiendas: ahora se muestran primero los supermercados y después las demás tiendas, y se añade un buscador para encontrar tiendas rápidamente.",

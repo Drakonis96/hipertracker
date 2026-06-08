@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Check, Lock, Users } from 'lucide-react';
+import { Check } from 'lucide-react';
 import Modal from './Modal';
 import Spinner from './Spinner';
 import { cn } from '../lib/cn';
+import { listTypeIcon } from '../lib/listMeta';
 import { useData } from '../store/useData';
 import { toast } from '../store/useToast';
 
@@ -58,7 +59,7 @@ export default function MoveToListModal({ open, onClose, items = [], onMoved }) 
     >
       <div className="flex flex-col gap-1">
         {lists.map((l) => {
-          const Icon = l.type === 'shared' ? Users : Lock;
+          const Icon = listTypeIcon(l.type);
           const isSource = l.id === sourceListId && items.length === 1;
           return (
             <button

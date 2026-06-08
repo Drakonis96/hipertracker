@@ -87,10 +87,10 @@ struct SettingsView: View {
                 Section {
                     ForEach(data.lists) { l in
                         HStack {
-                            Image(systemName: l.isShared ? "person.2" : "lock").foregroundStyle(.secondary)
+                            Image(systemName: l.shareIcon).foregroundStyle(.secondary)
                             VStack(alignment: .leading) {
                                 Text(l.name)
-                                Text("\(l.isShared ? "Compartida" : "Personal") · \(l.checkedCount ?? 0)/\(l.itemCount ?? 0)").font(.caption).foregroundStyle(.secondary)
+                                Text("\(l.shareLabel) · \(l.checkedCount ?? 0)/\(l.itemCount ?? 0)").font(.caption).foregroundStyle(.secondary)
                             }
                             Spacer()
                             Button { editingList = l } label: { Image(systemName: "pencil") }.buttonStyle(.plain).foregroundStyle(.secondary)
@@ -129,7 +129,7 @@ struct SettingsView: View {
 
                 // Acerca de
                 Section("Acerca de") {
-                    LabeledContent("Versión", value: "v0.1.10")
+                    LabeledContent("Versión", value: "v0.1.11")
                     if let base = session.config?.normalizedBase, let url = URL(string: base + "/api/docs") {
                         Link("Documentación de la API", destination: url)
                     }
