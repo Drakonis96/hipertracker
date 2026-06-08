@@ -14,6 +14,7 @@ struct ProductEditView: View {
     @State private var targetList = ""
     @State private var saving = false
     @State private var error: String?
+    @State private var loaded = false
 
     private var editing: Bool { item != nil }
     private var suggestions: [String] { suggestEmojis(name) }
@@ -111,6 +112,11 @@ struct ProductEditView: View {
     }
 
     private func load() {
+        // Solo una vez: al volver del selector de tiendas (NavigationLink), SwiftUI
+        // vuelve a disparar .onAppear; sin esta guarda se reiniciarían las tiendas
+        // (y el nombre/notas) recién editados y los cambios se perderían.
+        guard !loaded else { return }
+        loaded = true
         targetList = item?.listId ?? listId
         if let it = item {
             name = it.name; iconType = it.iconType; icon = it.icon; notes = it.notes ?? ""

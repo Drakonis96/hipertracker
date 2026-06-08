@@ -129,7 +129,7 @@ struct SettingsView: View {
 
                 // Acerca de
                 Section("Acerca de") {
-                    LabeledContent("Versión", value: "v0.1.8")
+                    LabeledContent("Versión", value: "v0.1.9")
                     if let base = session.config?.normalizedBase, let url = URL(string: base + "/api/docs") {
                         Link("Documentación de la API", destination: url)
                     }

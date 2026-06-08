@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.9",
+          "date": "2026-06-08",
+          "localizedDescription": "Arreglo: al editar un producto y cambiar de tienda, el cambio ya se guarda correctamente en iOS/iPadOS/macOS (antes se descartaba al volver del selector de tiendas). Crear, editar y eliminar funcionan con fiabilidad.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.9/HiperTracker.ipa",
+          "size": 2470808,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.8",
           "date": "2026-06-08",
           "localizedDescription": "Sugerencias de emoji al escribir el nombre del producto (en español o inglés), selector de tiendas con los supermercados primero y logos de tienda más grandes.",
