@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
+  Search,
   Moon,
   Sun,
   Monitor,
@@ -83,6 +84,7 @@ export default function Settings() {
   const [profileModal, setProfileModal] = useState({ open: false, profile: null });
   const [listModal, setListModal] = useState({ open: false, list: null });
   const [customStoreOpen, setCustomStoreOpen] = useState(false);
+  const [storeSearch, setStoreSearch] = useState('');
   const [confirm, setConfirm] = useState(null);
   const [importing, setImporting] = useState(false);
   const [importingAll, setImportingAll] = useState(false);
@@ -90,10 +92,18 @@ export default function Settings() {
   const backupRef = useRef(null);
 
   const activeList = lists.find((l) => l.id === activeListId);
-  const storesByCat = stores.reduce((acc, s) => {
-    (acc[s.categoryLabel] ||= []).push(s);
-    return acc;
-  }, {});
+  const storeGroups = useMemo(() => {
+    const needle = storeSearch.trim().toLowerCase();
+    const filtered = stores.filter((s) => !needle || s.name.toLowerCase().includes(needle));
+    const order = { supermercados: 0, otras: 1, personalizada: 2 };
+    const byCat = {};
+    for (const s of filtered) {
+      (byCat[s.categoryLabel] ||= { cat: s.category, items: [] }).items.push(s);
+    }
+    return Object.entries(byCat)
+      .sort((a, b) => (order[a[1].cat] ?? 9) - (order[b[1].cat] ?? 9))
+      .map(([label, g]) => [label, g.items]);
+  }, [stores, storeSearch]);
 
   const doExport = async (format) => {
     if (!activeList) return;
@@ -347,7 +357,18 @@ export default function Settings() {
             </button>
           }
         >
-          {Object.entries(storesByCat).map(([label, list]) => (
+          <div className="p-3 pb-0">
+            <div className="relative">
+              <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <input
+                value={storeSearch}
+                onChange={(e) => setStoreSearch(e.target.value)}
+                placeholder="Buscar tienda…"
+                className="ht-input pl-9"
+              />
+            </div>
+          </div>
+          {storeGroups.map(([label, list]) => (
             <div key={label} className="p-3">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">{label}</p>
               <div className="flex flex-wrap gap-2">
@@ -388,7 +409,10 @@ export default function Settings() {
               </div>
             </div>
           ))}
-          {!stores.some((s) => s.custom) && (
+          {storeGroups.length === 0 && (
+            <div className="px-3 pb-3 text-sm text-zinc-400">No hay tiendas que coincidan con “{storeSearch}”.</div>
+          )}
+          {storeGroups.length > 0 && !stores.some((s) => s.custom) && (
             <div className="px-3 pb-3 text-xs text-zinc-400">
               Aún no has añadido tiendas personalizadas. Útiles para comercios sin logo en el sistema.
             </div>

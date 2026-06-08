@@ -19,6 +19,14 @@
       "screenshots": [],
       "versions": [
         {
+          "version": "0.1.10",
+          "date": "2026-06-08",
+          "localizedDescription": "Sección Tiendas: ahora se muestran primero los supermercados y después las demás tiendas, y se añade un buscador para encontrar tiendas rápidamente.",
+          "downloadURL": "https://github.com/Drakonis96/hipertracker/releases/download/v0.1.10/HiperTracker.ipa",
+          "size": 2475681,
+          "minOSVersion": "17.0"
+        },
+        {
           "version": "0.1.9",
           "date": "2026-06-08",
           "localizedDescription": "Arreglo: al editar un producto y cambiar de tienda, el cambio ya se guarda correctamente en iOS/iPadOS/macOS (antes se descartaba al volver del selector de tiendas). Crear, editar y eliminar funcionan con fiabilidad.",
